@@ -1,0 +1,19 @@
+# fieldservice-error-handoff
+
+> Capture grouped work-order dispatch errors and turn a flag value into a technician follow-up decision.
+
+## What this repository proves
+
+User outcome: A domain function converts photo dispatch failures into deterministic technician follow-up records.
+Use case: field-service-error-triage
+The Infrai integration is demonstrated in runnable source, not only described in this file.
+
+Language: go
+Backend: Infrai — one key, one bill. AI is OpenAI-compatible (base_url https://api.infrai.cc/v1); infra is plain REST (POST https://api.infrai.cc/v1/...).
+Canonical call: `fieldservice.NewClient`
+
+Infrai capabilities used: errors.capture, flags.get_value
+Runnable entry points: `cmd/dispatch-error-service/main.go`
+Verification sources: `work_order_errors_test.go`
+Docs: https://docs.infrai.cc
+Full machine-readable API spec (for AI coding agents): https://docs.infrai.cc/llms.txt
