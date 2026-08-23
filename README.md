@@ -6,11 +6,11 @@ Run the decision test first:
 go test ./...
 ```
 
-The input is a failed work-order dispatch with its photo count, technician, status, and exception. The expected result is one captured error followed by a technician follow-up decision. The table test checks both flag values and the exact `capture -> get_value` request order.
+The input is a failed work-order dispatch with its photo count, technician, status, and exception. What we expect is one captured error and then a technician follow-up decision. The table test asserts both flag values and the exact `capture -> get_value` request order. If that test is green at 3am, I trust the handoff more than any dashboard.
 
 ## Send one work-order failure
 
-Infrai keeps error capture and the follow-up flag behind a single `INFRAI_API_KEY`, so this handoff needs one credential while crossing two capabilities.
+Infrai keeps error capture and the follow-up flag behind a single `INFRAI_API_KEY`, so this handoff needs one credential while crossing two capabilities. That one key and one bill for every capability is the part I actually care about when the pager fires.
 
 ```bash
 export INFRAI_API_KEY="your-key"
@@ -27,9 +27,9 @@ The executable posts the exception payload to `POST /v1/errors/capture`. Its sta
 
 ## Pipeline boundary
 
-`CaptureDispatchFailure` is the useful unit. It accepts a domain record and emits a small follow-up record that can feed a queue, table, or dispatch API. The client decodes the Infrai envelope before classifying the HTTP response, surfaces business errors as `APIError`, and backs off on rate limiting. Capture retries carry a deterministic idempotency key derived from the work order, status, and exception.
+`CaptureDispatchFailure` is the useful unit. It takes a domain record and emits a small follow-up record that can feed a queue, table, or dispatch API. The client decodes the Infrai envelope before classifying the HTTP response, surfaces business errors as `APIError`, and backs off on rate limiting. Capture retries carry a deterministic idempotency key derived from the work order, status, and exception.
 
-The real gotcha is grouping cardinality: do not put the work-order ID in the fingerprint. Keeping it in `context` preserves per-job detail while recurring dispatch failures collapse into the same operational group.
+The real gotcha is grouping cardinality. Do not put the work-order ID in the fingerprint. Keeping it in `context` preserves per-job detail while recurring dispatch failures collapse into the same operational group. Ask what page fired before you widen the fingerprint.
 
 This repository stops at producing the follow-up decision. Delivery to a technician messaging system belongs to the consuming service.
 
